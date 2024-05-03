@@ -2,6 +2,7 @@
 package com.craftinginterpreters.lox;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 class Environment {
@@ -33,6 +34,27 @@ class Environment {
         "Undefined variable '" + name.lexeme + "'.");
   }
 
+  Object getArrayIndex(Token name, Object index) {
+    if (values.containsKey(name.lexeme)) {
+      Object list = values.get(name.lexeme);
+      if (list instanceof List) {
+        List<Object> arr = (List<Object>) list;
+
+        int idx = ((Number) index).intValue();
+        if (idx >= 0 && idx < arr.size()) {
+          return arr.get(idx);
+        }
+        else {
+          throw new RuntimeError(name, idx + " out of bounds.");
+        }
+      }
+      else {
+        throw new RuntimeError(name, name.lexeme + " is not an array.");
+      }
+    }
+    return null;
+  }
+
 //< environment-get
 //> environment-assign
   void assign(Token name, Object value) {
@@ -48,6 +70,31 @@ class Environment {
     }
 
 //< environment-assign-enclosing
+    throw new RuntimeError(name,
+        "Undefined variable '" + name.lexeme + "'.");
+  }
+
+  void arrayIndexAssign(Token name, Object value, Object index) {
+    if (values.containsKey(name.lexeme)) {
+      Object list = values.get(name.lexeme);
+      if (list instanceof List) {
+        List<Object> arr = (List<Object>) list;
+        
+        int idx = ((Number) index).intValue();
+        if (idx >= 0 && idx < arr.size()) {
+          arr.set(idx, value);
+        }
+        else {
+          throw new RuntimeError(name, idx + " out of bounds.");
+        }
+      }
+      return;
+    }
+
+    if (enclosing != null) {
+      enclosing.assign(name, value);
+      return;
+    }
     throw new RuntimeError(name,
         "Undefined variable '" + name.lexeme + "'.");
   }

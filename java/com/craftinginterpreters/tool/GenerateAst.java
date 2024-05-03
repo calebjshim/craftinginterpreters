@@ -27,6 +27,9 @@ public class GenerateAst {
 //< Classes get-ast
       "Grouping : Expr expression",
       "Literal  : Object value",
+      "Array    : List<Expr> contents",
+      "ArrayAccess  : Expr.Variable variable, Expr index",
+      "ArrayAssign  : Expr.Variable variable, Expr index, Expr value",
 //> Control Flow logical-ast
       "Logical  : Expr left, Token operator, Expr right",
 //< Control Flow logical-ast

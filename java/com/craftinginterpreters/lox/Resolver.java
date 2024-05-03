@@ -203,6 +203,11 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     define(stmt.name);
     return null;
   }
+
+  // @Override
+  // public Void visitVarArrayStmt(Stmt.VarArray stmt) {
+  //   return null;
+  // }
 //< visit-var-stmt
 //> visit-while-stmt
   @Override
@@ -257,6 +262,23 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 //> visit-literal-expr
   @Override
   public Void visitLiteralExpr(Expr.Literal expr) {
+    return null;
+  }
+
+  @Override
+  public Void visitArrayExpr(Expr.Array expr) {
+    return null;
+  }
+
+  @Override
+  public Void visitArrayAccessExpr(Expr.ArrayAccess expr) {
+    resolve(expr.variable);
+    resolve(expr.index);
+    return null;
+  }
+
+  @Override
+  public Void visitArrayAssignExpr(Expr.ArrayAssign expr) {
     return null;
   }
 //< visit-literal-expr

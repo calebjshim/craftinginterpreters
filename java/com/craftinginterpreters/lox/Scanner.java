@@ -30,6 +30,7 @@ class Scanner {
     keywords.put("true",   TRUE);
     keywords.put("var",    VAR);
     keywords.put("while",  WHILE);
+    keywords.put("in", IN);
   }
 //< keyword-map
   private final String source;
@@ -63,6 +64,8 @@ class Scanner {
       case ')': addToken(RIGHT_PAREN); break;
       case '{': addToken(LEFT_BRACE); break;
       case '}': addToken(RIGHT_BRACE); break;
+      case '[': addToken(LEFT_BRACK); break;
+      case ']': addToken(RIGHT_BRACK); break;
       case ',': addToken(COMMA); break;
       case '.': addToken(DOT); break;
       case '-': addToken(MINUS); break;

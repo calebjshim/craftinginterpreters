@@ -222,13 +222,14 @@ class Parser {
 //> Statements and State parse-var-declaration
   private Stmt varDeclaration() {
     Token name = consume(IDENTIFIER, "Expect variable name.");
-
     Expr initializer = null;
+
     if (match(EQUAL)) {
       initializer = expression();
     }
 
     consume(SEMICOLON, "Expect ';' after variable declaration.");
+
     return new Stmt.Var(name, initializer);
   }
 //< Statements and State parse-var-declaration
@@ -308,6 +309,10 @@ class Parser {
         Expr.Get get = (Expr.Get)expr;
         return new Expr.Set(get.object, get.name, value);
 //< Classes assign-set
+      }
+      else if (expr instanceof Expr.ArrayAccess) {
+        Expr.ArrayAccess array = (Expr.ArrayAccess)expr;
+        return new Expr.ArrayAssign(array.variable, array.index, value);
       }
 
       error(equals, "Invalid assignment target."); // [no-throw]
@@ -457,9 +462,23 @@ class Parser {
     if (match(TRUE)) return new Expr.Literal(true);
     if (match(NIL)) return new Expr.Literal(null);
 
+    if (match(LEFT_BRACK)) {
+      List<Expr> contents = new ArrayList<>();
+
+      if (!check(RIGHT_BRACK)) {
+        do {
+            Expr expr = expression();
+            contents.add(expr);
+          } while(match(COMMA));
+        }
+        consume(RIGHT_BRACK, "Expect ']' after contents.");
+        return new Expr.Array(contents);
+      }
+
     if (match(NUMBER, STRING)) {
       return new Expr.Literal(previous().literal);
     }
+
 //> Inheritance parse-super
 
     if (match(SUPER)) {
@@ -477,6 +496,19 @@ class Parser {
 //> Statements and State parse-identifier
 
     if (match(IDENTIFIER)) {
+      Expr.Variable variable = new Expr.Variable(previous());
+      if (match(LEFT_BRACK)) {
+        Expr index = null;
+        if (match(NUMBER)) {
+          index = new Expr.Literal(previous().literal);
+        }
+        else if (match(IDENTIFIER)) {
+          index = new Expr.Variable(previous());
+        }
+
+        consume(RIGHT_BRACK, "Expect ']' after index.");
+        return new Expr.ArrayAccess(variable, index);
+      }
       return new Expr.Variable(previous());
     }
 //< Statements and State parse-identifier
@@ -555,6 +587,7 @@ class Parser {
         case VAR:
         case FOR:
         case IF:
+        case IN:
         case WHILE:
         case PRINT:
         case RETURN:

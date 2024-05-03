@@ -11,6 +11,9 @@ abstract class Expr {
     R visitGetExpr(Get expr);
     R visitGroupingExpr(Grouping expr);
     R visitLiteralExpr(Literal expr);
+    R visitArrayExpr(Array expr);
+    R visitArrayAccessExpr(ArrayAccess expr);
+    R visitArrayAssignExpr(ArrayAssign expr);
     R visitLogicalExpr(Logical expr);
     R visitSetExpr(Set expr);
     R visitSuperExpr(Super expr);
@@ -116,6 +119,54 @@ abstract class Expr {
     final Object value;
   }
 //< expr-literal
+//> expr-array
+  static class Array extends Expr {
+    Array(List<Expr> contents) {
+      this.contents = contents;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitArrayExpr(this);
+    }
+
+    final List<Expr> contents;
+  }
+//< expr-array
+//> expr-arrayaccess
+  static class ArrayAccess extends Expr {
+    ArrayAccess(Expr.Variable variable, Expr index) {
+      this.variable = variable;
+      this.index = index;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitArrayAccessExpr(this);
+    }
+
+    final Expr.Variable variable;
+    final Expr index;
+  }
+//< expr-arrayaccess
+//> expr-arrayassign
+  static class ArrayAssign extends Expr {
+    ArrayAssign(Expr.Variable variable, Expr index, Expr value) {
+      this.variable = variable;
+      this.index = index;
+      this.value = value;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitArrayAssignExpr(this);
+    }
+
+    final Expr.Variable variable;
+    final Expr index;
+    final Expr value;
+  }
+//< expr-arrayassign
 //> expr-logical
   static class Logical extends Expr {
     Logical(Expr left, Token operator, Expr right) {

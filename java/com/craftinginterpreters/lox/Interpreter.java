@@ -231,6 +231,7 @@ class Interpreter implements Expr.Visitor<Object>,
     environment.define(stmt.name.lexeme, value);
     return null;
   }
+
 //< Statements and State visit-var
 //> Control Flow visit-while
   @Override
@@ -259,6 +260,24 @@ class Interpreter implements Expr.Visitor<Object>,
 
 //< Resolving and Binding resolved-assign
     return value;
+  }
+
+  @Override
+  public Void visitArrayAssignExpr(Expr.ArrayAssign expr) {
+    Object value = evaluate(expr.value);
+    Object arrayObject = lookUpVariable(expr.variable.name, expr);
+    Double integerObject = (Double) evaluate(expr.index);
+    int indexValue = integerObject.intValue();
+
+    List<Object> array = (List<Object>) arrayObject;
+    int index = indexValue;
+
+    if (index < 0 || index >= array.size()) {
+      throw new RuntimeError(expr.variable.name, "Array index out of bounds.");
+    }
+
+    globals.arrayIndexAssign(expr.variable.name, value, integerObject);
+    return null;
   }
 //< Statements and State visit-assign
 //> visit-binary
@@ -384,6 +403,36 @@ class Interpreter implements Expr.Visitor<Object>,
   @Override
   public Object visitLiteralExpr(Expr.Literal expr) {
     return expr.value;
+  }
+
+  @Override
+  public List<Object> visitArrayExpr(Expr.Array expr) {
+    List<Object> array = new ArrayList<>();
+    for (Expr values : expr.contents) {
+      array.add(evaluate(values));
+    }
+    return array;
+  }
+
+  @Override
+  public Object visitArrayAccessExpr(Expr.ArrayAccess expr) {
+    Object arrayObject = lookUpVariable(expr.variable.name, expr);
+    Object indexObject = evaluate(expr.index);
+
+    int indexValue = (int) Math.round((double) indexObject);
+
+    // if (arrayObject instanceof List && indexValue instanceof Integer) {
+      List<Object> array = (List<Object>) arrayObject;
+      int index = indexValue;
+
+      if (index < 0 || index >= array.size()) {
+        throw new RuntimeError(expr.variable.name, "Array index out of bounds.");
+      }
+    // else {
+    //   throw new RuntimeError(expr.variable.name, "Invalid array access operation.");
+    // }
+
+    return globals.getArrayIndex(expr.variable.name, indexValue);
   }
 //< visit-literal
 //> Control Flow visit-logical
